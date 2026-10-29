@@ -3,7 +3,11 @@ import { BaseProvider } from './base';
 import { OpenAIChatRequest, ProviderResponse } from '../types';
 
 export class OpenAIProvider extends BaseProvider {
-  constructor(model: string, baseUrl?: string, private extraBody?: Record<string, unknown>) {
+  constructor(
+    model: string,
+    baseUrl?: string,
+    private extraBody?: Record<string, unknown>,
+  ) {
     super(model, baseUrl);
   }
 
@@ -32,11 +36,14 @@ export class OpenAIProvider extends BaseProvider {
       };
 
       if (request.stream) {
-        return this.handleStream(client, params as OpenAI.Chat.ChatCompletionCreateParamsStreaming);
+        return this.handleStream(
+          client,
+          params as OpenAI.Chat.ChatCompletionCreateParamsStreaming,
+        );
       }
       return this.handleNonStream(
         client,
-        params as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+        params as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming,
       );
     } catch (error) {
       return this.handleError(error, 'OpenAIProvider');
@@ -45,7 +52,7 @@ export class OpenAIProvider extends BaseProvider {
 
   private async handleNonStream(
     client: OpenAI,
-    params: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+    params: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming,
   ): Promise<ProviderResponse> {
     const response = await client.chat.completions.create(params);
     return { success: true, response: response as any };
@@ -53,7 +60,7 @@ export class OpenAIProvider extends BaseProvider {
 
   private async handleStream(
     client: OpenAI,
-    params: OpenAI.Chat.ChatCompletionCreateParamsStreaming
+    params: OpenAI.Chat.ChatCompletionCreateParamsStreaming,
   ): Promise<ProviderResponse> {
     const stream = await client.chat.completions.create(params);
     const { readable, writable } = new TransformStream<Uint8Array>();
