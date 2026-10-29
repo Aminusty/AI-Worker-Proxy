@@ -3,6 +3,10 @@ import { BaseProvider } from './base';
 import { OpenAIChatRequest, ProviderResponse } from '../types';
 
 export class OpenAIProvider extends BaseProvider {
+  constructor(model: string, baseUrl?: string, private extraBody?: Record<string, unknown>) {
+    super(model, baseUrl);
+  }
+
   async chat(request: OpenAIChatRequest, apiKey: string): Promise<ProviderResponse> {
     try {
       const client = new OpenAI({
@@ -13,6 +17,7 @@ export class OpenAIProvider extends BaseProvider {
       const params:
         | OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
         | OpenAI.Chat.ChatCompletionCreateParamsStreaming = {
+        ...(this.extraBody ?? {}),
         model: this.model,
         messages: request.messages as any,
         temperature: request.temperature,
