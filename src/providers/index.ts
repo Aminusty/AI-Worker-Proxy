@@ -14,13 +14,13 @@ export function createProvider(config: ProviderConfig, env: Env): AIProvider {
       return new GoogleProvider(config.model, undefined, config.grounding);
 
     case 'openai':
-      return new OpenAIProvider(config.model);
+      return new OpenAIProvider(config.model, undefined, config.extraBody);
 
     case 'openai-compatible':
       if (!config.baseUrl) {
         throw new Error('baseUrl is required for openai-compatible provider');
       }
-      return new OpenAIProvider(config.model, config.baseUrl);
+      return new OpenAIProvider(config.model, config.baseUrl, config.extraBody);
 
     case 'cloudflare-ai':
       if (!env.AI) {
