@@ -3,11 +3,7 @@ import { BaseProvider } from './base';
 import { OpenAIChatRequest, ProviderResponse } from '../types';
 
 export class OpenAIProvider extends BaseProvider {
-  constructor(
-    model: string,
-    baseUrl?: string,
-    private extraBody?: Record<string, unknown>
-  ) {
+  constructor(model: string, baseUrl?: string, private extraBody?: Record<string, unknown>) {
     super(model, baseUrl);
   }
 
@@ -36,10 +32,7 @@ export class OpenAIProvider extends BaseProvider {
       };
 
       if (request.stream) {
-        return this.handleStream(
-          client,
-          params as OpenAI.Chat.ChatCompletionCreateParamsStreaming
-        );
+        return this.handleStream(client, params as OpenAI.Chat.ChatCompletionCreateParamsStreaming);
       }
       return this.handleNonStream(
         client,
