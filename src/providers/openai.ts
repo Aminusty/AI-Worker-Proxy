@@ -36,10 +36,7 @@ export class OpenAIProvider extends BaseProvider {
       };
 
       if (request.stream) {
-        return this.handleStream(
-          client,
-          params as OpenAI.Chat.ChatCompletionCreateParamsStreaming
-        );
+        return this.handleStream(client, params as OpenAI.Chat.ChatCompletionCreateParamsStreaming);
       }
       return this.handleNonStream(
         client,
@@ -72,9 +69,9 @@ export class OpenAIProvider extends BaseProvider {
         for await (const chunk of stream) {
           // OpenAI SDK already returns properly formatted chunks with `index` on tool_calls.
           // Pass through as-is for maximum compatibility.
-          await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+          await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\\n\\n`));
         }
-        await writer.write(encoder.encode('data: [DONE]\n\n'));
+        await writer.write(encoder.encode('data: [DONE]\\n\\n'));
       } catch (error) {
         console.error('[OpenAIProvider] Stream error:', error);
         try {
@@ -86,8 +83,8 @@ export class OpenAIProvider extends BaseProvider {
             model: params.model,
             choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
           };
-          await writer.write(encoder.encode(`data: ${JSON.stringify(errorFinish)}\n\n`));
-          await writer.write(encoder.encode('data: [DONE]\n\n'));
+          await writer.write(encoder.encode(`data: ${JSON.stringify(errorFinish)}\\n\\n`));
+          await writer.write(encoder.encode('data: [DONE]\\n\\n'));
         } catch {
           // Writer may already be closed
         }
