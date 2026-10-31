@@ -3,7 +3,11 @@ import { BaseProvider } from './base';
 import { OpenAIChatRequest, ProviderResponse } from '../types';
 
 export class OpenAIProvider extends BaseProvider {
-  constructor(model: string, baseUrl?: string, private extraBody?: Record<string, unknown>) {
+  constructor(
+    model: string,
+    baseUrl?: string,
+    private extraBody?: Record<string, unknown>
+  ) {
     super(model, baseUrl);
   }
 
