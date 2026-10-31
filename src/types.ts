@@ -93,6 +93,8 @@ export interface ProviderConfig {
   baseUrl?: string;
   /** Enable Google Search grounding (Google provider only) */
   grounding?: boolean;
+  /** Extra provider-specific request fields (e.g. reasoning_effort) */
+  extraBody?: Record<string, unknown>;
 }
 
 export interface RouteConfig {

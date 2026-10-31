@@ -66,6 +66,31 @@
 }
 ```
 
+### Provider-specific request parameters (reasoning, etc.)
+
+The `openai-compatible` provider accepts an optional `extraBody` object. Its fields are forwarded to the upstream Chat Completions API, while the proxy's standard fields (model, messages, stream, and sampling options) remain controlled by the incoming request.
+
+For NVIDIA GLM-5.3-Flash, for example, a route can include documented parameters like this:
+
+```json
+{
+  "glm-flash": [
+    {
+      "provider": "openai-compatible",
+      "baseUrl": "https://integrate.api.nvidia.com/v1",
+      "model": "z-ai/glm-5.3-flash",
+      "apiKeys": ["NVIDIA_KEY_1"],
+      "extraBody": {
+        "reasoning_effort": "low",
+        "clear_thinking": true
+      }
+    }
+  ]
+}
+```
+
+Use only parameters supported by the selected upstream model. Parameter names and accepted values differ between providers and models; an unsupported field may cause the upstream API to reject the request. This option does not itself remove client-side or upstream timeouts. Streaming can help only when the client requests `stream: true` and the upstream starts emitting chunks.
+
 ### Step 3: Add GitHub Secrets (for Cloudflare auth)
 
 1. Go to **Secrets** tab (next to Variables)
