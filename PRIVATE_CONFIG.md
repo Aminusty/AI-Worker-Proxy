@@ -78,7 +78,7 @@ For NVIDIA GLM-5.3-Flash, for example, a route can include documented parameters
     {
       "provider": "openai-compatible",
       "baseUrl": "https://integrate.api.nvidia.com/v1",
-      "model": "model": "z-ai/glm-5.3-flash",
+      "model": "z-ai/glm-5.3-flash",
       "apiKeys": ["NVIDIA_KEY_1"],
       "extraBody": {
         "reasoning_effort": "low",
