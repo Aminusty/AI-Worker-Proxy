@@ -59,23 +59,30 @@ export class OpenAIProvider extends BaseProvider {
     client: OpenAI,
     params: OpenAI.Chat.ChatCompletionCreateParamsStreaming
   ): Promise<ProviderResponse> {
-    const stream = await client.chat.completions.create(params);
     const { readable, writable } = new TransformStream<Uint8Array>();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
 
-    (async () => {
+    // Return the response stream immediately instead of waiting for NVIDIA's
+    // first token. This lets Cloudflare send HTTP headers before a slow model
+    // finishes its initial reasoning.
+    void (async () => {
+      const heartbeat = setInterval(() => {
+        void writer.write(encoder.encode(': keep-alive\\n\\n')).catch(() => {
+          // The client may have disconnected.
+        });
+      }, 15000);
+
       try {
+        const stream = await client.chat.completions.create(params);
+
         for await (const chunk of stream) {
-          // OpenAI SDK already returns properly formatted chunks with `index` on tool_calls.
-          // Pass through as-is for maximum compatibility.
-          await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+          await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\\n\\n`));
         }
-        await writer.write(encoder.encode('data: [DONE]\n\n'));
+        await writer.write(encoder.encode('data: [DONE]\\n\\n'));
       } catch (error) {
         console.error('[OpenAIProvider] Stream error:', error);
         try {
-          // Send a clean finish so the client doesn't hang
           const errorFinish = {
             id: 'chatcmpl-error',
             object: 'chat.completion.chunk',
@@ -83,16 +90,17 @@ export class OpenAIProvider extends BaseProvider {
             model: params.model,
             choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
           };
-          await writer.write(encoder.encode(`data: ${JSON.stringify(errorFinish)}\n\n`));
-          await writer.write(encoder.encode('data: [DONE]\n\n'));
+          await writer.write(encoder.encode(`data: ${JSON.stringify(errorFinish)}\\n\\n`));
+          await writer.write(encoder.encode('data: [DONE]\\n\\n'));
         } catch {
-          // Writer may already be closed
+          // Writer may already be closed.
         }
       } finally {
+        clearInterval(heartbeat);
         try {
           await writer.close();
         } catch {
-          // Already closed
+          // Already closed.
         }
       }
     })();
