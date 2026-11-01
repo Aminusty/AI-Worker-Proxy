@@ -130,7 +130,9 @@ export class OpenAIProvider extends BaseProvider {
           cause_message:
             typeof cause?.message === 'string' ? cause.message : null,
           own_properties:
-            error && typeof error === 'object' ? Object.getOwnPropertyNames(error) : [],
+            error && typeof error === 'object'
+              ? Object.getOwnPropertyNames(error)
+              : [],
         };
 
         // Use info-level logging as well so the diagnostic is visible even if
