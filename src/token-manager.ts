@@ -47,7 +47,7 @@ export class TokenManager {
         if (response.statusCode && !this.isRetryableStatusCode(response.statusCode)) {
           break;
         }
-        } catch (error) {
+      } catch (error) {
         lastError = error;
 
         const apiError = error as {
