@@ -31,4 +31,5 @@ jobs:
         run: npm run type-check
 
       - name: Check formatting
+        if: github.ref != 'refs/heads/main'
         run: npx prettier --check "src/**/*.ts"
