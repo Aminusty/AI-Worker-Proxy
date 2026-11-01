@@ -62,12 +62,26 @@ export class OpenAIProvider extends BaseProvider {
     const { readable, writable } = new TransformStream<Uint8Array>();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
+    const startedAt = Date.now();
+    let firstChunkLogged = false;
+    let firstHeartbeatLogged = false;
+
+    console.log('[OpenAIProvider] Starting NVIDIA stream request:', {
+      model: params.model,
+      timestamp: new Date(startedAt).toISOString(),
+    });
 
     // Return the response stream immediately instead of waiting for NVIDIA's
     // first token. This lets Cloudflare send HTTP headers before a slow model
     // finishes its initial reasoning.
     void (async () => {
       const heartbeat = setInterval(() => {
+        if (!firstHeartbeatLogged) {
+          firstHeartbeatLogged = true;
+          console.log('[OpenAIProvider] First heartbeat sent:', {
+            elapsed_ms: Date.now() - startedAt,
+          });
+        }
         void writer.write(encoder.encode(': keep-alive\n\n')).catch(() => {
           // The client may have disconnected.
         });
@@ -75,8 +89,17 @@ export class OpenAIProvider extends BaseProvider {
 
       try {
         const stream = await client.chat.completions.create(params);
+        console.log('[OpenAIProvider] NVIDIA stream opened:', {
+          elapsed_ms: Date.now() - startedAt,
+        });
 
         for await (const chunk of stream) {
+          if (!firstChunkLogged) {
+            firstChunkLogged = true;
+            console.log('[OpenAIProvider] First NVIDIA chunk received:', {
+              elapsed_ms: Date.now() - startedAt,
+            });
+          }
           await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
         }
         await writer.write(encoder.encode('data: [DONE]\n\n'));
