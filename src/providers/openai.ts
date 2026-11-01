@@ -125,7 +125,9 @@ export class OpenAIProvider extends BaseProvider {
           type: apiError?.type ?? null,
           request_id: apiError?.request_id ?? null,
           message:
-            typeof apiError?.message === 'string' ? apiError.message : String(error),
+            typeof apiError?.message === 'string'
+              ? apiError.message
+              : String(error),
           cause_name: typeof cause?.name === 'string' ? cause.name : null,
           cause_message:
             typeof cause?.message === 'string' ? cause.message : null,
