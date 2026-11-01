@@ -117,24 +117,16 @@ export class OpenAIProvider extends BaseProvider {
           elapsed_ms: Date.now() - startedAt,
           name: typeof apiError?.name === 'string' ? apiError.name : null,
           constructor:
-            error && typeof error === 'object'
-              ? error.constructor?.name ?? null
-              : null,
+            error && typeof error === 'object' ? (error.constructor?.name ?? null) : null,
           status: apiError?.status ?? null,
           code: apiError?.code ?? null,
           type: apiError?.type ?? null,
           request_id: apiError?.request_id ?? null,
-          message:
-            typeof apiError?.message === 'string'
-              ? apiError.message
-              : String(error),
+          message: typeof apiError?.message === 'string' ? apiError.message : String(error),
           cause_name: typeof cause?.name === 'string' ? cause.name : null,
-          cause_message:
-            typeof cause?.message === 'string' ? cause.message : null,
+          cause_message: typeof cause?.message === 'string' ? cause.message : null,
           own_properties:
-            error && typeof error === 'object'
-              ? Object.getOwnPropertyNames(error)
-              : [],
+            error && typeof error === 'object' ? Object.getOwnPropertyNames(error) : [],
         };
 
         // Use info-level logging as well so the diagnostic is visible even if
