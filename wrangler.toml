@@ -12,7 +12,7 @@ binding = "AI"
 enabled = true
 head_sampling_rate = 1
 invocation_logs = true
-persist = false
+persist = true
 
 # ====================================================================================
 # EXAMPLE CONFIGURATION
