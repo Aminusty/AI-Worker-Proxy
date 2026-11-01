@@ -87,11 +87,17 @@ export class OpenAIProvider extends BaseProvider {
         });
       }, 15000);
 
+      let phase: 'opening' | 'reading' = 'opening';
+
       try {
+        console.log('[OpenAIProvider] Awaiting NVIDIA stream response:', {
+          elapsed_ms: Date.now() - startedAt,
+        });
         const stream = await client.chat.completions.create(params);
         console.log('[OpenAIProvider] NVIDIA stream opened:', {
           elapsed_ms: Date.now() - startedAt,
         });
+        phase = 'reading';
 
         for await (const chunk of stream) {
           if (!firstChunkLogged) {
@@ -104,21 +110,29 @@ export class OpenAIProvider extends BaseProvider {
         }
         await writer.write(encoder.encode('data: [DONE]\n\n'));
       } catch (error) {
-        const apiError = error as {
-          status?: number;
-          code?: string;
-          type?: string;
-          message?: string;
-          request_id?: string;
+        const apiError = error as Record<string, unknown>;
+        const cause = apiError?.cause as Record<string, unknown> | undefined;
+        const details = {
+          phase,
+          elapsed_ms: Date.now() - startedAt,
+          name: typeof apiError?.name === 'string' ? apiError.name : null,
+          constructor:
+            error && typeof error === 'object' ? (error.constructor?.name ?? null) : null,
+          status: apiError?.status ?? null,
+          code: apiError?.code ?? null,
+          type: apiError?.type ?? null,
+          request_id: apiError?.request_id ?? null,
+          message: typeof apiError?.message === 'string' ? apiError.message : String(error),
+          cause_name: typeof cause?.name === 'string' ? cause.name : null,
+          cause_message: typeof cause?.message === 'string' ? cause.message : null,
+          own_properties:
+            error && typeof error === 'object' ? Object.getOwnPropertyNames(error) : [],
         };
 
-        console.error('[OpenAIProvider] Stream error:', {
-          status: apiError.status ?? null,
-          code: apiError.code ?? null,
-          type: apiError.type ?? null,
-          request_id: apiError.request_id ?? null,
-          message: apiError.message ?? String(error),
-        });
+        // Use info-level logging as well so the diagnostic is visible even if
+        // the observability view filters error-level console entries.
+        console.log('[OpenAIProvider] NVIDIA request failed:', details);
+        console.error('[OpenAIProvider] Stream error:', details);
 
         try {
           const errorFinish = {
