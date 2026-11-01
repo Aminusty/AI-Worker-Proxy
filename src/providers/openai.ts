@@ -81,7 +81,22 @@ export class OpenAIProvider extends BaseProvider {
         }
         await writer.write(encoder.encode('data: [DONE]\n\n'));
       } catch (error) {
-        console.error('[OpenAIProvider] Stream error:', error);
+        const apiError = error as {
+          status?: number;
+          code?: string;
+          type?: string;
+          message?: string;
+          request_id?: string;
+        };
+
+        console.error('[OpenAIProvider] Stream error:', {
+          status: apiError.status ?? null,
+          code: apiError.code ?? null,
+          type: apiError.type ?? null,
+          request_id: apiError.request_id ?? null,
+          message: apiError.message ?? String(error),
+        });
+
         try {
           const errorFinish = {
             id: 'chatcmpl-error',
