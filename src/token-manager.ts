@@ -48,25 +48,25 @@ export class TokenManager {
           break;
         }
       } catch (error) {
-  lastError = error;
+        lastError = error;
 
-  const apiError = error as {
-    status?: number;
-    statusCode?: number;
-    code?: string;
-    message?: string;
-  };
+        const apiError = error as {
+          status?: number;
+          statusCode?: number;
+          code?: string;
+          message?: string;
+        };
 
-  console.error('[TokenManager] Provider request failed:', {
-    status: apiError.status ?? apiError.statusCode ?? null,
-    code: apiError.code ?? null,
-    message: apiError.message ?? String(error),
-  });
+        console.error('[TokenManager] Provider request failed:', {
+          status: apiError.status ?? apiError.statusCode ?? null,
+          code: apiError.code ?? null,
+          message: apiError.message ?? String(error),
+        });
 
-  if (!isRetryableError(error)) {
-    break;
-  }
-}
+        if (!isRetryableError(error)) {
+          break;
+        }
+      }
     }
 
     // All keys failed
