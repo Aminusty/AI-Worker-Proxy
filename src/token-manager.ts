@@ -3,7 +3,10 @@ import { createProvider } from './providers';
 import { isRetryableError } from './utils/error-handler';
 
 export class TokenManager {
-    constructor(private config: ProviderConfig, private env: Env) {}
+  constructor(
+    private config: ProviderConfig,
+    private env: Env
+  ) {}
   /**
    * Try to execute request with token rotation
    * Will try all tokens in order until one succeeds
