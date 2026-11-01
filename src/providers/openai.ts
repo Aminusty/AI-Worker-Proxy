@@ -68,7 +68,7 @@ export class OpenAIProvider extends BaseProvider {
     // finishes its initial reasoning.
     void (async () => {
       const heartbeat = setInterval(() => {
-        void writer.write(encoder.encode(': keep-alive\\n\\n')).catch(() => {
+        void writer.write(encoder.encode(': keep-alive\n\n')).catch(() => {
           // The client may have disconnected.
         });
       }, 15000);
@@ -77,9 +77,9 @@ export class OpenAIProvider extends BaseProvider {
         const stream = await client.chat.completions.create(params);
 
         for await (const chunk of stream) {
-          await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\\n\\n`));
+          await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
         }
-        await writer.write(encoder.encode('data: [DONE]\\n\\n'));
+        await writer.write(encoder.encode('data: [DONE]\n\n'));
       } catch (error) {
         console.error('[OpenAIProvider] Stream error:', error);
         try {
@@ -90,8 +90,8 @@ export class OpenAIProvider extends BaseProvider {
             model: params.model,
             choices: [{ index: 0, delta: {}, finish_reason: 'stop' }],
           };
-          await writer.write(encoder.encode(`data: ${JSON.stringify(errorFinish)}\\n\\n`));
-          await writer.write(encoder.encode('data: [DONE]\\n\\n'));
+          await writer.write(encoder.encode(`data: ${JSON.stringify(errorFinish)}\n\n`));
+          await writer.write(encoder.encode('data: [DONE]\n\n'));
         } catch {
           // Writer may already be closed.
         }
