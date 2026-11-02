@@ -16,6 +16,7 @@ export class OpenAIProvider extends BaseProvider {
       const client = new OpenAI({
         apiKey,
         baseURL: this.baseUrl,
+        maxRetries: 2,
       });
 
       const params:
